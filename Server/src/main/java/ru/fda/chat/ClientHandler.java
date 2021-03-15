@@ -28,18 +28,18 @@ public class ClientHandler {
                     if (msg.startsWith("/login ")) {
                         String usernameFromLogin = msg.split("\\s")[1];
                         if (server.isUserOnline(usernameFromLogin)) {
-                            sendMessage("/login_failed Current nickname is already used " + username);
+                            sendMessage("/login_failed Current nickname is already used");
                             continue;
                         }
                         username = usernameFromLogin;
                         sendMessage("/login_ok " + username);
-                        server.broadcastMessage(username + ": " + msg);
+                        server.subscribe(this);
                         break;
                     }
                 }
                 while (true) {
                     String msg = in.readUTF();
-                    server.broadcastMessage(msg);
+                    server.broadcastMessage(username + ": " + msg);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
