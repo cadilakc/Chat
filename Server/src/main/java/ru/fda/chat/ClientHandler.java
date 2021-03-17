@@ -39,6 +39,16 @@ public class ClientHandler {
                 }
                 while (true) {
                     String msg = in.readUTF();
+
+                    if (msg.equals("/exit")) {
+                        break;
+                    }
+
+                    if (msg.equals("/who_am_i")) {
+                        this.sendMessage("Ваш текущий никнейм: " + username);
+                        continue;
+                    }
+
                     server.broadcastMessage(username + ": " + msg);
                 }
             } catch (IOException e) {
