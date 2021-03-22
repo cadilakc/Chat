@@ -46,6 +46,17 @@ public class Server {
         }
     }
 
+    public void sendPrivateMessage(ClientHandler sender, String receiverUsername, String message) throws IOException {
+        for (ClientHandler c : clients) {
+            if (c.getUsername().equals(receiverUsername)) {
+                c.sendMessage("От: " + sender.getUsername() + " Сообщение: " + message);
+                sender.sendMessage("Пользователю: " + receiverUsername + " Сообщение: " + message);
+                return;
+            }
+        }
+            sender.sendMessage("Невозможно отправить сообщение пользователю: " + receiverUsername + ". Такого пользователя нет в сети.");
+    }
+
     public boolean isUserOnline(String username) {
         for (ClientHandler c : clients) {
             if (c.getUsername().equals(username)) {

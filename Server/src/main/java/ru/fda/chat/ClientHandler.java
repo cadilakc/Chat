@@ -40,12 +40,8 @@ public class ClientHandler {
                 while (true) {
                     String msg = in.readUTF();
 
-                    if (msg.equals("/exit")) {
-                        break;
-                    }
-
-                    if (msg.equals("/who_am_i")) {
-                        this.sendMessage("Ваш текущий никнейм: " + username);
+                    if (msg.startsWith("/")) {
+                        executeCommand(msg);
                         continue;
                     }
 
@@ -57,6 +53,23 @@ public class ClientHandler {
                 disconnect();
             }
         }).start();
+    }
+
+    private void executeCommand(String cmd) throws IOException {
+        if (cmd.startsWith("/w ")) {
+            String[] tokens = cmd.split("\\s", 3);
+            server.sendPrivateMessage(this, tokens[1], tokens[2]);
+            return;
+        }
+        if (cmd.equals("/exit")) {
+            disconnect();
+            return;
+        }
+
+        if (cmd.equals("/who_am_i")) {
+            this.sendMessage("Ваш текущий никнейм: " + username);
+            return;
+        }
     }
 
     public void sendMessage(String message) throws IOException {
