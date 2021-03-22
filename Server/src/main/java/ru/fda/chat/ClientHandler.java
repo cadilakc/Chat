@@ -1,5 +1,7 @@
 package ru.fda.chat;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,7 +18,7 @@ public class ClientHandler {
         return username;
     }
 
-    public ClientHandler(Server server, Socket socket) throws Exception {
+    public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
         this.in = new DataInputStream(socket.getInputStream());
@@ -55,7 +57,7 @@ public class ClientHandler {
         }).start();
     }
 
-    private void executeCommand(String cmd) throws IOException {
+    private void executeCommand(String cmd) {
         if (cmd.startsWith("/w ")) {
             String[] tokens = cmd.split("\\s", 3);
             server.sendPrivateMessage(this, tokens[1], tokens[2]);
@@ -70,10 +72,17 @@ public class ClientHandler {
             this.sendMessage("Ваш текущий никнейм: " + username);
             return;
         }
+
     }
 
-    public void sendMessage(String message) throws IOException {
-        out.writeUTF(message);
+
+    public void sendMessage(String message) {
+        try {
+            out.writeUTF(message);
+        } catch (IOException e) {
+            disconnect();
+        }
+
     }
 
     public void disconnect() {
@@ -86,18 +95,4 @@ public class ClientHandler {
             }
         }
     }
-//        int msgCounter = 0;
-//        while (true){
-//            String msg = in.readUTF();
-//            System.out.println(msg);
-//
-//            if(msg.startsWith("/")){
-//                if(msg.equals("/stat")){
-//                    out.writeUTF("Message count: " + msgCounter);
-//                    continue;
-//                }
-//            }
-//            out.writeUTF("ECHO: " + msg);
-//            msgCounter++;
-//        }
 }

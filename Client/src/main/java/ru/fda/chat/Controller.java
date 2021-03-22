@@ -1,6 +1,8 @@
 package ru.fda.chat;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 
@@ -8,8 +10,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable {
     @FXML
     TextArea textChat;
 
@@ -18,6 +22,12 @@ public class Controller {
 
     @FXML
     HBox msgPanel, loginPanel;
+
+    @FXML
+    ListView<String> clientsList;
+
+    @FXML
+    Button exit;
 
     private DataInputStream in;
     private DataOutputStream out;
@@ -31,12 +41,26 @@ public class Controller {
             loginPanel.setManaged(false);
             msgPanel.setVisible(true);
             msgPanel.setManaged(true);
+            clientsList.setVisible(true);
+            clientsList.setManaged(true);
+            exit.setVisible(true);
+            exit.setManaged(true);
+
         } else {
             loginPanel.setVisible(true);
             loginPanel.setManaged(true);
             msgPanel.setVisible(false);
             msgPanel.setManaged(false);
+            clientsList.setVisible(false);
+            clientsList.setManaged(false);
+            exit.setVisible(false);
+            exit.setManaged(false);
         }
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        setUsername(null);
     }
 
     public void login() {
@@ -77,6 +101,19 @@ public class Controller {
 
                     while (true) {
                         String msg = in.readUTF();
+                        if (msg.startsWith("/")) {
+                            if (msg.startsWith("/clients_list ")){
+                                String[] tokens = msg.split("\\s");
+
+                                Platform.runLater(()-> {
+                                    clientsList.getItems().clear();
+                                    for (int i = 1; i < tokens.length; i++) {
+                                        clientsList.getItems().add(tokens[i]);
+                                    }
+                                });
+                            }
+                            continue;
+                        }
                         textChat.appendText(msg + "\n");
                     }
 
@@ -102,6 +139,11 @@ public class Controller {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Невозможно отправить сообщение", ButtonType.OK);
             alert.showAndWait();
         }
+    }
+
+    public void clickExit(){
+        textChat.clear();
+        disconnect();
     }
 
     public void disconnect() {
