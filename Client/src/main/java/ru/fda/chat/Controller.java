@@ -39,40 +39,6 @@ public class Controller {
         }
     }
 
-    public void connect() {
-        try {
-            socket = new Socket("localhost", 8189);
-            in = new DataInputStream(socket.getInputStream());
-            out = new DataOutputStream(socket.getOutputStream());
-            Thread t = new Thread(() -> {
-                try {
-                    while (true) {
-                        String message = in.readUTF();
-                        if (message.startsWith("/login_ok ")) {
-                            setUsername(message.split("\\s")[1]);
-                            break;
-                        }
-                        if (message.startsWith("/login_failed ")) {
-                            String cause = message.split("\\s", 2)[1];
-                            textChat.appendText(cause + "\n");
-                        }
-                    }
-                    while (true) {
-                        String message = in.readUTF();
-                        textChat.appendText(message + "\n");
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    disconnect();
-                }
-            });
-            t.start();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to connect to server [ localhost:8189 ]");
-        }
-    }
-
     public void login() {
         if (socket == null || socket.isClosed()) {
             connect();
@@ -89,14 +55,41 @@ public class Controller {
         }
     }
 
-    public void disconnect() {
-        setUsername(null);
+    public void connect() {
         try {
-            if (socket != null) {
-                socket.close();
-            }
+            socket = new Socket("localhost", 8189);
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+            Thread t = new Thread(() -> {
+                try {
+
+                    while (true) {
+                        String msg = in.readUTF();
+                        if (msg.startsWith("/login_ok ")) {
+                            setUsername(msg.split("\\s")[1]);
+                            break;
+                        }
+                        if (msg.startsWith("/login_failed ")) {
+                            String cause = msg.split("\\s", 2)[1];
+                            textChat.appendText(cause + "\n");
+                        }
+                    }
+
+                    while (true) {
+                        String msg = in.readUTF();
+                        textChat.appendText(msg + "\n");
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    disconnect();
+                }
+            });
+            t.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Невозможно подключиться", ButtonType.OK);
+            alert.showAndWait();
         }
     }
 
@@ -108,6 +101,17 @@ public class Controller {
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Невозможно отправить сообщение", ButtonType.OK);
             alert.showAndWait();
+        }
+    }
+
+    public void disconnect() {
+        setUsername(null);
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

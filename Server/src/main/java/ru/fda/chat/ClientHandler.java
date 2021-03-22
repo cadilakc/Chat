@@ -28,18 +28,24 @@ public class ClientHandler {
                     if (msg.startsWith("/login ")) {
                         String usernameFromLogin = msg.split("\\s")[1];
                         if (server.isUserOnline(usernameFromLogin)) {
-                            sendMessage("/login_failed Current nickname is already used " + username);
+                            sendMessage("/login_failed Current nickname is already used");
                             continue;
                         }
                         username = usernameFromLogin;
                         sendMessage("/login_ok " + username);
-                        server.broadcastMessage(username + ": " + msg);
+                        server.subscribe(this);
                         break;
                     }
                 }
                 while (true) {
                     String msg = in.readUTF();
-                    server.broadcastMessage(msg);
+
+                    if (msg.startsWith("/")) {
+                        executeCommand(msg);
+                        continue;
+                    }
+
+                    server.broadcastMessage(username + ": " + msg);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -47,6 +53,23 @@ public class ClientHandler {
                 disconnect();
             }
         }).start();
+    }
+
+    private void executeCommand(String cmd) throws IOException {
+        if (cmd.startsWith("/w ")) {
+            String[] tokens = cmd.split("\\s", 3);
+            server.sendPrivateMessage(this, tokens[1], tokens[2]);
+            return;
+        }
+        if (cmd.equals("/exit")) {
+            disconnect();
+            return;
+        }
+
+        if (cmd.equals("/who_am_i")) {
+            this.sendMessage("Ваш текущий никнейм: " + username);
+            return;
+        }
     }
 
     public void sendMessage(String message) throws IOException {

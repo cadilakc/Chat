@@ -1,0 +1,16 @@
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<VBox fx:controller="ru.fda.chat.Controller" xmlns:fx="http://javafx.com/fxml" alignment="center">
+    <HBox fx:id="loginPanel">
+        <TextField fx:id="usernameField" promptText="Укажите свой ник" HBox.hgrow="ALWAYS" onAction="#login"/>
+        <Button text="Войти" onAction="#login"/>
+    </HBox>
+    <TextArea fx:id="textChat" VBox.vgrow="ALWAYS" editable="false"/>
+    <HBox fx:id="msgPanel" visible="false" managed="false">
+        <TextField fx:id="message" promptText="Сообщение..." HBox.hgrow="ALWAYS" onAction="#clickSend"/>
+        <Button fx:id="send" text="Отправить" onAction="#clickSend"/>
+    </HBox>
+</VBox>
